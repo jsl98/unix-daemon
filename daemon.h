@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <syslog.h>
+#include <fnctl.h>
  
 //function prototypes
 //not sure if they should be void but using it as a placeholder
