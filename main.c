@@ -3,11 +3,19 @@
  *	Last Modified:  9 April, 2015
  */
  
-#include <stdio.h>
-#include <stdlib.h>
+#include "main.h"
  
-int main(int argc, char* argv[]){
- 
+int main(void){
+	
+	daemon_init();
+	int slept = 0;
+	
+	while(TRUE){
+			sleep(5);
+			slept = 5;
+			
+	}
+	
 }
  
  

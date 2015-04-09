@@ -10,5 +10,7 @@ void init_daemon(void){
 }
  
 void daemon_exit(int sig_number){
- 
+	syslog(LOG_NOTICE, "The Daemon with PID %d exists ...", getpid());
+	closelog();
+	exit(EXIT_SUCCESS);
 }
