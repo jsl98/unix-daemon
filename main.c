@@ -1,21 +1,37 @@
-/* Homework 7
- * Author: Justin Liddicoat, Daniel Durazo, Tsosie Schneider
- *	Last Modified:  9 April, 2015
+/* Author(s): Justin Liddicoat, Daniel Durazo, Tsosie Schneider
+ *
+ * This file is the "driver" program.
+ * First: call daemon_init() to become a daemon.
+ * Any code following the init will run as daemon.
+ * To close daemon call: kill <pid of daemon>
+ * Information is sent to the system log "CS480 Daemon".
  */
- 
+
 #include "main.h"
- 
+
+
 int main(void){
-	
+
+	// Initialize this code to run as a daemon
 	daemon_init();
-	int slept = 0;
-	
+
+	// Variable to record how many seconds daemon has been running
+	int time = 0;
+
+	// Quick message to reference to daemon start & the PID (for calling kill)
+	syslog(LOG_NOTICE, "is starting up... \n");
+
+    // Infinitely loop to keep daemon running
 	while(TRUE){
-			sleep(5);
-			slept = 5;
-			
+
+        // Take breaks to avoid swamping out syslog
+        sleep(30);
+
+        // Keep track of approximate run time
+		time += 30;
+
+        // The major "task" for now, simple info
+		syslog(LOG_INFO, "has been running for %d seconds \n", time);
+
 	}
-	
 }
- 
- 
