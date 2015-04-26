@@ -16,10 +16,12 @@ int main(int argc, char* argv[]){
     int sock_client, status, i;
 
     // Place to store user input
-    char send_buffer[100];
-    char output[100];
-    char recv_buffer[1];
 
+    int send_buffer, err;
+//    char send_buffer[100];
+    char output[100];
+//    char recv_buffer[1];
+    int recv_buffer;
     // Setup listening on localhost and port 8080
     serv_address.sin_family = AF_INET;
     serv_address.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -46,71 +48,48 @@ int main(int argc, char* argv[]){
 
     // Inform client user vital information
     printf("Connection success!\n");
-    printf("Enter text to send to server: (type 'q' to quit)\n");
+    printf("Enter Integers to send to server: (type an integer < 1 to quit)\n");
 
     // Loop until quit condition is met
     while(TRUE){
 
-        // Get user input
-        fgets(send_buffer, sizeof(send_buffer), stdin);
-
-        // Loop through the input string
-        i = 0;
-        while(send_buffer[i]) { // While not the null terminator
-
-            // Replace the new-line char with a null terminator
-            if(send_buffer[i] == '\n') {send_buffer[i] = '\0';}
-
-            // Until end of string
-            i++;
+        // Get user integer input
+        err = scanf("%i", &send_buffer);
+        // Conditional to test if characters were entered
+        if (err == 0){
+        // indicated input error and clears scanf buffer
+            printf("Invalid input.\n");
+            while (getchar() != '\n');
         }
-
-        // Now 'i' contains the number of chars to transmit to server
-        // Attempt to send the buffer contents to server
-        status = send(sock_client, send_buffer, i, 0);
-        if( status == -1) {
-
-            // Something went wrong while sending
-            printf("Send failure!\n");
+        // Input less than 1 indicates a desire to close the connection
+        if (send_buffer < 1){
+            // send server indicator to close connection
+            status = send(sock_client, &send_buffer, sizeof(send_buffer), 0);
+            // prompts user to try again if the server was not informe to close connection
+            if (status == -1)
+                printf("Failed to close connection please try again.\n");
+            else
+                // closes the file desciptor for the socket
+                close(sock_client);
+                // exit the client successfully
+                return (EXIT_SUCCESS);
         }
+        else{
+            // send the integer to the server
+            status = send(sock_client, &send_buffer, sizeof(send_buffer), 0);
 
-        // Await the reply of the echo server, storing char by char into buffer
-        // until receiving a 'q' or null-terminator
-        i = 0;
+            //
+            if( status == -1) {
+                // Something went wrong while sending
+                printf("Send failure!\n");
+            }else{
 
-        // Expecting one char at a time: server is sending one char at a time
-        while(recv(sock_client, recv_buffer, sizeof(char), 0) == sizeof(char)) {
-
-            // Copy the received char into the output buffer
-            output[i] = *recv_buffer;
-
-            // Check if this is the end of the string
-            if(output[i] == '\0') {
-
-                // End of string, so break out of receive loop
-                break;
+            // Await the reply of the echo server
+            recv(sock_client, &recv_buffer, sizeof(recv_buffer), 0);
+            // print the integer response to user
+            printf("%i\n",recv_buffer);
             }
-
-            // Check if this char is 'q' to signify request to quit
-            if (output[i] == 'q') {
-
-                // Quit requested, so terminate the string
-                output[++i] = '\0';
-
-                // Print out the string up until the quit request
-                puts(output);
-                printf("\n");
-
-                // Exit client
-                exit(EXIT_SUCCESS);
-            }
-
-            // Else continue to grab input
-            i++;
         }
-
-        // Done grabbing input from server: print the received buffer contents
-        puts(output);
 
     } // Loop to get user input and await server echo
 

@@ -12,10 +12,17 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "daemon.h"
+#include "daemon.c"
 
 #define FALSE 0
 #define TRUE !FALSE
 
+typedef struct container{
+    pthread_mutex_t lock;
+    int *memory;
+    int sock_descriptor;
+} Container;
+
 //Protype the thread function
 void *conn_handler(void *sock_descriptor);
+int threeAplusOne(int start, int total, int* memory);
