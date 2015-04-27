@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "daemon.c"
+#include "daemon.h"
 
 #define FALSE 0
 #define TRUE !FALSE

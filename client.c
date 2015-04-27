@@ -18,10 +18,11 @@ int main(int argc, char* argv[]){
     // Place to store user input
 
     int send_buffer, err;
-//    char send_buffer[100];
+
     char output[100];
-//    char recv_buffer[1];
+
     int recv_buffer;
+
     // Setup listening on localhost and port 8080
     serv_address.sin_family = AF_INET;
     serv_address.sin_addr.s_addr = inet_addr("127.0.0.1");

@@ -54,14 +54,16 @@ int main(int argc, char *argv[]){
     while (i<1000){
         content.memory[i++] = 0;
     }
+
     // set the mutex lock location
     content.lock = loch;
+
     // initialize the mutex
     pthread_mutex_init(&content.lock, NULL);
 
     // Marks sock_descriptor as listening and accepting incoming connections
     listen(sock_descriptor, 0);
-//    printf("%p %p \n", content.memory, loch);
+
     // Infinite loop that spawns new threads for incoming connections.
     // Connection/thread errors are sent to system log and attempted again.
 	while(TRUE){
@@ -95,7 +97,6 @@ int main(int argc, char *argv[]){
         }
 	}
 	pthread_mutex_destroy(&content.lock);
-	// Getting here should not be possible
 	return EXIT_FAILURE;
 }
 
@@ -108,47 +109,48 @@ void *conn_handler(void *sock_descriptor) {
     temp_box = (Container *)sock_descriptor;
     box = *temp_box;
     int num_bytes_read, status, buffer, steps;
-//    char send_me[1];
 
     // set socket descriptor to local variable
     int sock = box.sock_descriptor;
 
-    // Continually get input until client sends any 'q'
+    // Continually get input until client sends a value less than 1
     while(TRUE){
 
-//        buffer = 0;
         // Attempt to read data coming from the client into the buffer.
         // Capture the number of bytes read to iterate through.
         num_bytes_read = read(sock, &buffer, sizeof(buffer));
 
         // Closes the  socket when a read error is returned
-        if (num_bytes_read ==-1){
+        if (num_bytes_read == -1){
             syslog(LOG_ERR, "Failed to read from socket, closing connection.");
             close(sock);
             pthread_exit((void *)EXIT_FAILURE);
         }
-        // closes the connection when the client indicated too end session
+        // closes the connection when the client indicated to end session
         if (buffer < 1){
             // Close the socket and exit thread
             close(sock);
             pthread_exit((void *)EXIT_SUCCESS);
         }
 
-        // call to 3 a plus one algorithm to get step #
+        // call to 3 a plus one algorithm to get number of steps
         steps = threeAplusOne(buffer, 0, box.memory);
 
         // mutex lock for read and write to array
         // though reading is not critical it was left inside the
         // the lock to prevent multiple writes to the array
         pthread_mutex_lock(&box.lock);
+
         // buffer offset by one to account for 0 index
         if (buffer-1 < 1000 && box.memory[buffer-1]==0){
             // sets step count for shared array to memorize
             // previously compute numbers
             box.memory[buffer-1]=steps;
         }
-        //unclock the mutex
+
+        //unlock the mutex
         pthread_mutex_unlock(&box.lock);
+
         // send the number of steps back to the client
         status = write(sock, &steps, sizeof(steps));
         if (status < 0){
@@ -173,11 +175,11 @@ int threeAplusOne(int start, int total, int* memory){
     if (start == 1){
         return total;
     }
-    // recursive call when a number is even value divided by 2 and step count incremente
+    // recursive call when a number is even value divided by 2 and step count increment
     if (start%2==0){
         return threeAplusOne(start/2, total+1, memory);
     }
-    // recursive call when a number is odd 3 times value plus 1 step count incremente
+    // recursive call when a number is odd 3 times value plus 1 step count increment
     else{
         return threeAplusOne((start*3)+1,total+1, memory);
     }
